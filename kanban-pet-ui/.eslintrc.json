@@ -11,6 +11,7 @@
     "plugin:eslint-plugin-jsx-a11y/recommended",
     "plugin:eslint-plugin-import/recommended",
     "airbnb",
+    "airbnb-typescript",
     "prettier"
   ],
   "parser": "@typescript-eslint/parser",
@@ -21,12 +22,14 @@
   "plugins": ["@typescript-eslint", "react"],
   "rules": {
     "react/react-in-jsx-scope": "off",
-    "react/jsx-filename-extension": [1, { "extensions": [".ts", ".tsx"] }]
+    "react/jsx-filename-extension": [1, { "extensions": [".ts", ".tsx"] }],
+    "react/function-component-definition": "off"
   },
   "settings": {
     "import/resolver": {
       "node": {
-        "paths": ["src"]
+        "paths": ["src"],
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
       }
     }
   },
