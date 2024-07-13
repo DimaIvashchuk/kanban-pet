@@ -1,9 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
-import * as jwt from 'jsonwebtoken';
 import * as crypto from 'crypto';
-import { User } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 
 const SERVER_SHORT_MEMORY_FOR_OAUTH = {};
@@ -92,60 +90,23 @@ export class AuthService {
         picture: userInfo.picture,
       });
 
+      const jwtConfig = this.configService.getOrThrow('auth.jwt');
+
+      const accessToken = user.issueJWTAccessToken(jwtConfig);
+      const refreshToken = user.issueJWTRefreshToken(jwtConfig);
+
+      console.log(user);
+
+      await this.userService.update(user.id, user);
+
       return {
-        accessToken: await this.issueJWTAccessToken(user),
-        refreshToken: await this.issueJWTRefreshToken(user),
+        accessToken,
+        refreshToken,
       };
     } catch (ex) {
       this.loggerService.error(ex);
       throw ex;
     }
-  }
-
-  private async issueJWTAccessToken(user: User): Promise<{
-    token: string;
-    token_type: string;
-  }> {
-    const jwtConfig = this.configService.getOrThrow('auth.jwt');
-
-    const accessToken = jwt.sign(
-      {
-        id: user.id,
-        fullName: `${user.firstName} ${user.lastName}`,
-        email: user.email,
-      },
-      jwtConfig.accessSecret,
-      {
-        expiresIn: jwtConfig.accessExpiresIn,
-      },
-    );
-
-    return {
-      token_type: 'Bearer',
-      token: accessToken,
-    };
-  }
-
-  private async issueJWTRefreshToken(user: User): Promise<{
-    token: string;
-    token_type: string;
-  }> {
-    const jwtConfig = this.configService.getOrThrow('auth.jwt');
-
-    const refreshToken = jwt.sign(
-      {
-        id: user.id,
-      },
-      jwtConfig.refreshSecret,
-      {
-        expiresIn: jwtConfig.refreshExpiresIn,
-      },
-    );
-
-    return {
-      token_type: 'Bearer',
-      token: refreshToken,
-    };
   }
 
   private async completeOauthLogin({

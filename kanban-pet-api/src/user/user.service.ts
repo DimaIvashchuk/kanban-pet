@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './dto/create.dto';
 import { UserRepository } from './user.repository';
+import { UpdateUserDto } from './dto/update.dto';
 
 @Injectable()
 export class UserService {
@@ -15,6 +16,24 @@ export class UserService {
 
       return user;
     } catch (ex) {
+      throw ex;
+    }
+  }
+
+  async update(id: string, dto: UpdateUserDto) {
+    try {
+      const user = await this.userRepository.findOne({ where: { id } });
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      this.userRepository.merge(user, dto);
+      await this.userRepository.save(user);
+
+      return user;
+    } catch (ex) {
+      this.logger.error(ex);
       throw ex;
     }
   }
