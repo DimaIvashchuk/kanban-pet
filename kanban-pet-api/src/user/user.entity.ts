@@ -2,6 +2,7 @@ import { SoftDeleteEntity } from 'src/base/base.entity';
 import { Column, Entity, Index } from 'typeorm';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
+import { TAuth } from 'src/base/configuration';
 
 @Entity({ name: 'users' })
 export class User extends SoftDeleteEntity {
@@ -27,52 +28,40 @@ export class User extends SoftDeleteEntity {
   @Column({ nullable: true })
   refreshTokenHash: string;
 
-  issueJWTAccessToken(jwtConfig: any): {
-    token: string;
-    token_type: string;
-  } {
+  issueJWTAccessToken(jwtConfig: TAuth): string {
     const accessToken = jwt.sign(
       {
-        id: this.id,
+        sub: this.id,
         fullName: `${this.firstName} ${this.lastName}`,
         email: this.email,
       },
-      jwtConfig.accessSecret,
+      jwtConfig.jwt.access.secret,
       {
-        expiresIn: jwtConfig.accessExpiresIn,
+        expiresIn: jwtConfig.jwt.access.expiresIn,
       },
     );
 
-    return {
-      token_type: 'Bearer',
-      token: accessToken,
-    };
+    return 'Bearer ' + accessToken;
   }
 
-  issueJWTRefreshToken(jwtConfig: any): {
-    token: string;
-    token_type: string;
-  } {
+  issueJWTRefreshToken(jwtConfig: TAuth): string {
     const refreshToken = jwt.sign(
       {
-        id: this.id,
+        sub: this.id,
       },
-      jwtConfig.refreshSecret,
+      jwtConfig.jwt.refresh.secret,
       {
-        expiresIn: jwtConfig.refreshExpiresIn,
+        expiresIn: jwtConfig.jwt.refresh.expiresIn,
       },
     );
 
     const rTknHash = crypto
-      .createHmac('sha256', jwtConfig.refreshSecret)
+      .createHmac('sha256', jwtConfig.jwt.refresh.secret)
       .update(refreshToken)
       .digest('hex');
 
     this.refreshTokenHash = rTknHash;
 
-    return {
-      token_type: 'Bearer',
-      token: refreshToken,
-    };
+    return refreshToken;
   }
 }

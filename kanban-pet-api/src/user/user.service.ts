@@ -2,6 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './dto/create.dto';
 import { UserRepository } from './user.repository';
 import { UpdateUserDto } from './dto/update.dto';
+import { plainToClass } from 'class-transformer';
+import { UserPlain } from './user.types';
 
 @Injectable()
 export class UserService {
@@ -31,7 +33,33 @@ export class UserService {
       this.userRepository.merge(user, dto);
       await this.userRepository.save(user);
 
-      return user;
+      return plainToClass(UserPlain, user);
+    } catch (ex) {
+      this.logger.error(ex);
+      throw ex;
+    }
+  }
+
+  async findAll() {
+    try {
+      const users = await this.userRepository.find();
+
+      return users.map((user) => plainToClass(UserPlain, user));
+    } catch (ex) {
+      this.logger.error(ex);
+      throw ex;
+    }
+  }
+
+  async findOne(id: string) {
+    try {
+      const user = await this.userRepository.findOne({ where: { id } });
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      return plainToClass(UserPlain, user);
     } catch (ex) {
       this.logger.error(ex);
       throw ex;
@@ -44,6 +72,19 @@ export class UserService {
 
       return user;
     } catch (ex) {
+      throw ex;
+    }
+  }
+
+  async findOneByRefreshTokenAndId(id: string, refreshToken: string) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id, refreshTokenHash: refreshToken },
+      });
+
+      return user;
+    } catch (ex) {
+      this.logger.error(ex);
       throw ex;
     }
   }

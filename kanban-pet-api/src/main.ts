@@ -11,6 +11,7 @@ import {
   RequestMethod,
   VersioningType,
 } from '@nestjs/common';
+import * as cookieParser from 'cookie-parser';
 import { HttpExceptionFilter } from './app.exception-filter';
 
 async function bootstrap() {
@@ -22,7 +23,8 @@ async function bootstrap() {
   );
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useLogger(app.get(PinoLogger));
-  app.enableCors();
+  app.enableCors({ credentials: true, origin: 'http://localhost:3000' });
+  app.use(cookieParser());
   app.flushLogs();
 
   app

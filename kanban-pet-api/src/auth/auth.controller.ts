@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Headers, Post } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post, Req, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiTags } from '@nestjs/swagger';
 import throwException from 'src/base/throwException';
+import { Request, Response } from 'express';
 
 @Controller({
   version: '1',
@@ -29,13 +30,31 @@ export class AuthController {
     @Body('code') code: string,
     @Body('state') state: string,
     @Headers('referer') referer: string,
+    @Res({ passthrough: true }) response: Response,
   ) {
     try {
       const data = await this.authService.exchangeCodeForToken(
         code,
         state,
         referer,
+        response,
       );
+
+      return {
+        data,
+      };
+    } catch (ex) {
+      throwException(ex);
+    }
+  }
+
+  @Post('/refresh')
+  async refresh(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    try {
+      const data = await this.authService.refreshToken(request, response);
 
       return {
         data,

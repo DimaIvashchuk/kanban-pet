@@ -1,7 +1,15 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import * as crypto from 'crypto';
+import { Request, Response } from 'express';
+import * as jwt from 'jsonwebtoken';
+import { TAuth, TGoogleOAuth } from 'src/base/configuration';
 import { UserService } from 'src/user/user.service';
 
 const SERVER_SHORT_MEMORY_FOR_OAUTH = {};
@@ -51,12 +59,18 @@ export class AuthService {
     }
   }
 
-  async exchangeCodeForToken(code: string, state: string, referer: string) {
+  async exchangeCodeForToken(
+    code: string,
+    state: string,
+    referer: string,
+    response: Response,
+  ) {
     try {
-      const googleConfig = this.configService.getOrThrow('google');
+      const googleConfig =
+        this.configService.getOrThrow<TGoogleOAuth>('google');
       const clientRedirectUrl = `${referer}sso/google/callback`;
 
-      const response = await axios.post(
+      const tokenResponse = await axios.post(
         `https://oauth2.googleapis.com/token`,
         null,
         {
@@ -71,14 +85,11 @@ export class AuthService {
         },
       );
 
-      const { access_token } = response.data;
+      const { access_token } = tokenResponse.data;
 
-      const userInfoResponse = await axios.get(
-        `https://www.googleapis.com/oauth2/v3/userinfo`,
-        {
-          headers: { Authorization: `Bearer ${access_token}` },
-        },
-      );
+      const userInfoResponse = await axios.get(googleConfig.userInfoUri, {
+        headers: { Authorization: `Bearer ${access_token}` },
+      });
 
       // email, given_name, family_name, picture
       const userInfo = userInfoResponse.data;
@@ -90,7 +101,7 @@ export class AuthService {
         picture: userInfo.picture,
       });
 
-      const jwtConfig = this.configService.getOrThrow('auth.jwt');
+      const jwtConfig = this.configService.getOrThrow<TAuth>('auth');
 
       const accessToken = user.issueJWTAccessToken(jwtConfig);
       const refreshToken = user.issueJWTRefreshToken(jwtConfig);
@@ -99,9 +110,54 @@ export class AuthService {
 
       await this.userService.update(user.id, user);
 
+      response.cookie(jwtConfig.jwt.access.cookie, accessToken);
+      response.cookie(jwtConfig.jwt.refresh.cookie, refreshToken);
+
       return {
-        accessToken,
-        refreshToken,
+        message: 'ok',
+      };
+    } catch (ex) {
+      this.loggerService.error(ex);
+      throw ex;
+    }
+  }
+
+  async refreshToken(request: Request, response: Response) {
+    try {
+      const jwtConfig = this.configService.getOrThrow<TAuth>('auth');
+
+      const refreshToken = request.cookies[jwtConfig.jwt.refresh.cookie];
+
+      if (!refreshToken) {
+        throw new ForbiddenException('Missing refresh token');
+      }
+
+      const { sub } = jwt.verify(refreshToken, jwtConfig.jwt.refresh.secret);
+
+      const rTknHash = crypto
+        .createHmac('sha256', jwtConfig.jwt.refresh.secret)
+        .update(refreshToken)
+        .digest('hex');
+
+      const user = await this.userService.findOneByRefreshTokenAndId(
+        sub as string,
+        rTknHash,
+      );
+
+      if (!user) {
+        throw new UnauthorizedException();
+      }
+
+      const newAccessToken = user.issueJWTAccessToken(jwtConfig);
+
+      response.cookie(jwtConfig.jwt.access.cookie, newAccessToken);
+
+      console.log(user);
+
+      await this.userService.update(user.id, user);
+
+      return {
+        message: 'ok',
       };
     } catch (ex) {
       this.loggerService.error(ex);

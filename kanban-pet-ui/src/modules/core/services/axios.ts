@@ -2,25 +2,8 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_ENV,
+  withCredentials: true,
 });
-
-export const getAccessToken = () => localStorage.getItem('access_token');
-
-api.interceptors.request.use(
-  async (config) => {
-    const accessToken = getAccessToken();
-
-    if (accessToken) {
-      // eslint-disable-next-line no-param-reassign
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    }
-
-    return config;
-  },
-  (error) => {
-    Promise.reject(error);
-  }
-);
 
 // api.interceptors.response.use(
 //   (response) => response,
