@@ -3,6 +3,7 @@ import { Column, Entity, Index } from 'typeorm';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
 import { TAuth } from 'src/base/configuration';
+import { Exclude } from 'class-transformer';
 
 @Entity({ name: 'users' })
 export class User extends SoftDeleteEntity {
@@ -25,6 +26,7 @@ export class User extends SoftDeleteEntity {
   @Column({ nullable: true })
   dob: Date;
 
+  @Exclude()
   @Column({ nullable: true })
   refreshTokenHash: string;
 

@@ -10,7 +10,7 @@ import * as crypto from 'crypto';
 import { Request, Response } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { TAuth, TGoogleOAuth } from 'src/base/configuration';
-import { UserService } from 'src/user/user.service';
+import { UserService } from 'src/modules/user/user.service';
 
 const SERVER_SHORT_MEMORY_FOR_OAUTH = {};
 

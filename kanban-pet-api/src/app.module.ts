@@ -5,8 +5,8 @@ import { LoggerModule } from 'nestjs-pino';
 
 import configuration from './base/configuration';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserModule } from './user/user.module';
-import { AuthModule } from './auth/auth.module';
+import { UserModule } from './modules/user/user.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
