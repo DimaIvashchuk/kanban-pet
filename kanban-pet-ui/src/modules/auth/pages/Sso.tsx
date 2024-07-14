@@ -1,10 +1,5 @@
 import { useEffect } from 'react';
-import {
-  redirect,
-  useLocation,
-  useNavigate,
-  useSearchParams,
-} from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import exchangeCodeForToken from '../api/exchangeCodeForToken';
 import { useRecoilState } from 'recoil';
 import { authState } from '../state/auth';
@@ -16,7 +11,7 @@ const Sso = () => {
 
   const exchangeCallback = () => {
     set$Auth(auth ? { ...auth, isLogged: true } : { isLogged: true });
-    navigate('/profile');
+    navigate('/');
   };
 
   useEffect(() => {

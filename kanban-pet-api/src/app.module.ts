@@ -7,6 +7,10 @@ import configuration from './base/configuration';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { TaskModule } from './modules/task/task.module';
+import { OrganizationModule } from './modules/organization/organization.module';
+import { ProjectModule } from './modules/project/project.module';
+import { RolesModule } from './modules/roles/roles.module';
 
 @Module({
   imports: [
@@ -30,6 +34,10 @@ import { AuthModule } from './modules/auth/auth.module';
     }),
     UserModule,
     AuthModule,
+    TaskModule,
+    OrganizationModule,
+    ProjectModule,
+    RolesModule,
   ],
   providers: [AppService],
 })

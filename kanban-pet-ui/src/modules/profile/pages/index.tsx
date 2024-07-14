@@ -7,6 +7,7 @@ const Profile = () => {
     await refreshToken();
   };
   useEffect(() => {
+    console.log('get user info');
     getUserInfo();
   }, []);
   return (
