@@ -6,7 +6,5 @@ export default async (code: string, state: string, callback: () => void) => {
     state,
   });
 
-  console.log(data);
-
   callback();
 };

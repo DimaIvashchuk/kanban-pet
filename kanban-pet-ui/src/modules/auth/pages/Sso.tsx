@@ -12,12 +12,10 @@ const Sso = () => {
   const navigate = useNavigate();
 
   const onLogin = () => {
-    console.log('onLogin');
     navigate('/profile');
   };
 
   useEffect(() => {
-    console.log(searchParams);
     const code = searchParams.get('code') || '';
     const state = searchParams.get('state') || '';
     exchangeCodeForToken(code, state, onLogin);

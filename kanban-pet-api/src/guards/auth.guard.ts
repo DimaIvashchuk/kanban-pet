@@ -19,8 +19,6 @@ export class AuthGuard implements CanActivate {
     const token = this.extractTokenFromCookie(request);
     const authKey = this.extractAuthKeyFromHeader(request);
 
-    console.log(token);
-
     // for testing purposes
     if (authKey) {
       if (authKey === this.configService.getOrThrow('auth.key')) {

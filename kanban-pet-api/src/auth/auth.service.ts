@@ -106,8 +106,6 @@ export class AuthService {
       const accessToken = user.issueJWTAccessToken(jwtConfig);
       const refreshToken = user.issueJWTRefreshToken(jwtConfig);
 
-      console.log(user);
-
       await this.userService.update(user.id, user);
 
       response.cookie(jwtConfig.jwt.access.cookie, accessToken);
@@ -151,8 +149,6 @@ export class AuthService {
       const newAccessToken = user.issueJWTAccessToken(jwtConfig);
 
       response.cookie(jwtConfig.jwt.access.cookie, newAccessToken);
-
-      console.log(user);
 
       await this.userService.update(user.id, user);
 
