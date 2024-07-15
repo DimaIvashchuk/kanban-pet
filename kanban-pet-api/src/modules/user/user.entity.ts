@@ -1,9 +1,10 @@
 import { SoftDeleteEntity } from 'src/base/base.entity';
-import { Column, Entity, Index } from 'typeorm';
+import { Column, Entity, Index, OneToMany } from 'typeorm';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
 import { TAuth } from 'src/base/configuration';
 import { Exclude } from 'class-transformer';
+import { Task } from '../task/entities/task.entity';
 
 @Entity({ name: 'users' })
 export class User extends SoftDeleteEntity {
@@ -66,4 +67,7 @@ export class User extends SoftDeleteEntity {
 
     return refreshToken;
   }
+
+  @OneToMany(() => Task, (task) => task.assignee)
+  tasks: Task[];
 }
