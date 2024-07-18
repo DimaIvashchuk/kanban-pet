@@ -54,7 +54,7 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     try {
-      const data = await this.authService.refreshToken(request, response);
+      const data = await this.authService.refreshToken(null, request, response);
 
       return {
         data,

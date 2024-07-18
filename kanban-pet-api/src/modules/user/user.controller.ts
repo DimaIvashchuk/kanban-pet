@@ -9,6 +9,7 @@ import { Get, Post, Put, Body, Param } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.entity';
 import { UpdateUserDto } from './dto/update.dto';
+import { CurrentUserId } from 'src/decorators/current-user.decorator';
 
 @Controller({ path: 'user', version: '1' })
 @UseGuards(AuthGuard)
@@ -17,7 +18,8 @@ export class UserController {
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Get()
-  async findAll(): Promise<User[]> {
+  async findAll(@CurrentUserId() userId: string): Promise<User[]> {
+    console.log(userId);
     return this.userService.findAll();
   }
 

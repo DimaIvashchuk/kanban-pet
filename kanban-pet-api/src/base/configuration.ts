@@ -72,7 +72,7 @@ const configuration: iConfiguration = {
       },
       refresh: {
         secret: process.env.AUTH_ACCESS_TOKEN_SECRET,
-        expiresIn: 24 * 60 * 60,
+        expiresIn: 30 * 24 * 60 * 60,
         cookie: 'refresh-token',
       },
     },

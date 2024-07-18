@@ -120,11 +120,16 @@ export class AuthService {
     }
   }
 
-  async refreshToken(request: Request, response: Response) {
+  async refreshToken(
+    rToken: string,
+    request: Request | null,
+    response: Response,
+  ) {
     try {
       const jwtConfig = this.configService.getOrThrow<TAuth>('auth');
 
-      const refreshToken = request.cookies[jwtConfig.jwt.refresh.cookie];
+      const refreshToken =
+        rToken || request.cookies[jwtConfig.jwt.refresh.cookie];
 
       if (!refreshToken) {
         throw new ForbiddenException('Missing refresh token');

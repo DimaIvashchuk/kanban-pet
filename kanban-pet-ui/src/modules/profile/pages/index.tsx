@@ -9,6 +9,10 @@ const Profile = () => {
   useEffect(() => {
     console.log('get user info');
     getUserInfo();
+
+    return () => {
+      console.log('cleanup');
+    };
   }, []);
   return (
     <div>
