@@ -1,10 +1,14 @@
 import { SoftDeleteEntity } from 'src/base/base.entity';
-import { Column, Entity, Index, OneToMany } from 'typeorm';
+import { Column, Entity, Index, ManyToMany, OneToMany } from 'typeorm';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
 import { TAuth } from 'src/base/configuration';
 import { Exclude } from 'class-transformer';
 import { Task } from '../task/entities/task.entity';
+import { Comment } from '../task/submodules/comment/entities/comment.entity';
+import { Role } from '../roles/entities/role.entity';
+import { Project } from '../project/entities/project.entity';
+import { Organization } from '../organization/entities/organization.entity';
 
 @Entity({ name: 'users' })
 export class User extends SoftDeleteEntity {
@@ -70,4 +74,16 @@ export class User extends SoftDeleteEntity {
 
   @OneToMany(() => Task, (task) => task.assignee)
   tasks: Task[];
+
+  @OneToMany(() => Comment, (comment) => comment.author)
+  comments: Comment[];
+
+  @OneToMany(() => Role, (role) => role.user)
+  roles: Role[];
+
+  @ManyToMany(() => Project, (project) => project.users)
+  projects: Project[];
+
+  @ManyToMany(() => Organization, (organization) => organization.users)
+  organizations: Organization[];
 }
